@@ -1,5 +1,6 @@
 package com.example.userauth.module.login.views
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,12 +44,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.userauth.Constants
+import com.example.userauth.module.login.viewModels.HomeViewModel
 import com.example.userauth.module.login.viewModels.LoginViewModel
 import com.example.userauth.network.NetworkState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel = viewModel()) {
+fun LoginScreen(navController: NavController,
+                loginViewModel: LoginViewModel = viewModel(),
+                homeViewModel: HomeViewModel = viewModel()
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
@@ -56,6 +61,7 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel = v
     val context = LocalContext.current
 
     val loginResponse by loginViewModel.mLoginResponse.collectAsState()
+    val homeResponse by homeViewModel.mHomeResponse.collectAsState()
 
     LaunchedEffect(loginResponse) {
         when(loginResponse){
@@ -63,11 +69,25 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel = v
             is NetworkState.Success -> {
                 Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
 
-                // TODO: save token to shared preference
-                navController.navigate(Constants.homeScreen)
+                val token: String? = (loginResponse as NetworkState.Success).value?.token
+                if(token != null) {
+                    homeViewModel.checkToken(token)
+                }
             }
             is NetworkState.Failure -> {
                 Toast.makeText(context, (loginResponse as NetworkState.Failure).errorMessage, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    LaunchedEffect(homeResponse) {
+        when (homeResponse) {
+            is NetworkState.Loading -> {}
+            is NetworkState.Success -> {
+                navController.navigate(Constants.homeScreen)
+            }
+            is NetworkState.Failure -> {
+                Toast.makeText(context, (homeResponse as NetworkState.Failure).errorMessage, Toast.LENGTH_SHORT).show()
             }
         }
     }

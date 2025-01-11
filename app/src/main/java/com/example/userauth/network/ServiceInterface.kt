@@ -1,6 +1,6 @@
 package com.example.userauth.network
 
-import com.example.userauth.module.home.models.HomeResponse
+import com.example.userauth.module.login.models.HomeResponse
 import com.example.userauth.module.login.models.LoginResponse
 import com.example.userauth.module.signup.models.SignupResponse
 import okhttp3.RequestBody
@@ -19,5 +19,5 @@ interface ServiceInterface {
     fun signupUser(@Body map: RequestBody): Call<SignupResponse>
 
     @GET(Endpoints.HOME)
-    fun home(@Header("Authorization Bearer") token: String): Call<HomeResponse>
+    fun home(@Header("Authorization") token: String): Call<HomeResponse>
 }

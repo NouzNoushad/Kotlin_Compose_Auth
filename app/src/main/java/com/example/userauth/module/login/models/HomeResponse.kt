@@ -1,4 +1,4 @@
-package com.example.userauth.module.home.models
+package com.example.userauth.module.login.models
 
 import com.google.gson.annotations.SerializedName
 
